@@ -148,7 +148,7 @@ export default function ReviewPanel({ result, reviewTime, onViewRefactored, show
 
         {sorted.length === 0 && (
           <div className="py-4 text-center text-[12px]" style={{ color: "var(--ok)" }}>
-            ✓ 0 DIAGNOSTICS — CLEAN PASS
+            ✓ 0 DIAGNOSTICS · CLEAN PASS
           </div>
         )}
       </div>

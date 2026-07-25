@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { Copy, RotateCcw, ChevronDown, Check } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Copy, RotateCcw, ChevronDown, ChevronRight, Check } from "lucide-react";
 import Logo from "@/components/Logo";
 import CodeEditor from "@/components/CodeEditor";
 import ReviewPanel, { ReviewResult } from "@/components/ReviewPanel";
@@ -69,6 +69,33 @@ function updateUI(data) {
 setInterval(setupDashboard, 1000);`,
     },
   ],
+  typescript: [
+    {
+      label: "Unsafe any types",
+      code: `interface User {
+  id: any;
+  name: any;
+  data: any;
+}
+
+async function fetchUser(id: any): Promise<any> {
+  const res = await fetch('/api/users/' + id);
+  const user: any = await res.json();
+  return user;
+}
+
+function processUsers(users: any[]) {
+  var total = 0;
+  for (var i = 0; i < users.length; i++) {
+    total = total + users[i].score;
+  }
+  return total;
+}
+
+const userData = fetchUser(123);
+console.log(userData.name);`,
+    },
+  ],
   python: [
     {
       label: "Insecure file handler",
@@ -95,31 +122,261 @@ if user_pass in passwords:
     print("Access granted")`,
     },
   ],
-  typescript: [
+  java: [
     {
-      label: "Unsafe any types",
-      code: `interface User {
-  id: any;
-  name: any;
-  data: any;
+      label: "Insecure login",
+      code: `import java.sql.*;
+
+public class UserAuth {
+    public static boolean login(String username, String password) throws Exception {
+        Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/db", "root", "root");
+        Statement stmt = conn.createStatement();
+        String query = "SELECT * FROM users WHERE username = '" + username
+            + "' AND password = '" + password + "'";
+        ResultSet rs = stmt.executeQuery(query);
+        return rs.next();
+    }
+
+    public static void main(String[] args) throws Exception {
+        for (int i = 0; i < 1000; i++) {
+            login("admin", "password" + i);
+        }
+    }
+}`,
+    },
+  ],
+  "c++": [
+    {
+      label: "Memory unsafe",
+      code: `#include <cstring>
+#include <iostream>
+
+char* copyInput(const char* input) {
+    char* buffer = new char[10];
+    strcpy(buffer, input);
+    return buffer;
 }
 
-async function fetchUser(id: any): Promise<any> {
-  const res = await fetch('/api/users/' + id);
-  const user: any = await res.json();
-  return user;
+int getArrayValue(int* arr, int size, int index) {
+    return arr[index];
 }
 
-function processUsers(users: any[]) {
-  var total = 0;
-  for (var i = 0; i < users.length; i++) {
-    total = total + users[i].score;
+int main() {
+    char* result = copyInput("This string is way longer than ten characters");
+    std::cout << result << std::endl;
+
+    int numbers[5] = {1, 2, 3, 4, 5};
+    std::cout << getArrayValue(numbers, 5, 10) << std::endl;
+
+    return 0;
+}`,
+    },
+  ],
+  go: [
+    {
+      label: "Goroutine leak",
+      code: `package main
+
+import (
+	"fmt"
+	"net/http"
+)
+
+func fetchData(url string) string {
+	resp, _ := http.Get(url)
+	body := make([]byte, 1024)
+	resp.Body.Read(body)
+	return string(body)
+}
+
+func processAll(urls []string) {
+	for _, url := range urls {
+		go func() {
+			data := fetchData(url)
+			fmt.Println(data)
+		}()
+	}
+}
+
+func main() {
+	urls := []string{"http://a.com", "http://b.com", "http://c.com"}
+	processAll(urls)
+}`,
+    },
+  ],
+  rust: [
+    {
+      label: "Panic-prone I/O",
+      code: `use std::fs::File;
+use std::io::Read;
+
+fn read_config(path: &str) -> String {
+    let mut file = File::open(path).unwrap();
+    let mut contents = String::new();
+    file.read_to_string(&mut contents).unwrap();
+    contents
+}
+
+fn calculate_total(prices: Vec<u32>) -> u32 {
+    let mut total: u32 = 0;
+    for price in prices {
+        total = total + price * 100;
+    }
+    total
+}
+
+fn main() {
+    let config = read_config("config.txt");
+    println!("{}", config);
+
+    let prices = vec![4_000_000_000, 3_000_000_000];
+    println!("{}", calculate_total(prices));
+}`,
+    },
+  ],
+  php: [
+    {
+      label: "Injection & XSS",
+      code: `<?php
+function getUser($username) {
+    $conn = mysqli_connect("localhost", "root", "", "app");
+    $query = "SELECT * FROM users WHERE username = '" . $username . "'";
+    $result = mysqli_query($conn, $query);
+    return mysqli_fetch_assoc($result);
+}
+
+$username = $_GET['username'];
+$user = getUser($username);
+echo "<h1>Welcome " . $user['name'] . "</h1>";
+
+$password = md5($_POST['password']);
+if ($password == $user['password']) {
+    echo "Logged in";
+}
+?>`,
+    },
+  ],
+  ruby: [
+    {
+      label: "Eval & mass assignment",
+      code: `class UsersController
+  def update_profile(params)
+    user = User.find(params[:id])
+    user.update(params[:profile])
+    user.save
+  end
+
+  def run_calculation(expression)
+    eval(expression)
+  end
+end
+
+def find_user_by_email(email)
+  User.where("email = '#{email}'").first
+end
+
+users = User.all
+users.each do |u|
+  puts u.name
+  u.orders.each do |o|
+    puts o.total
+  end
+end`,
+    },
+  ],
+  swift: [
+    {
+      label: "Force unwrap crashes",
+      code: `import Foundation
+
+func fetchUser(id: Int) -> [String: Any] {
+    let url = URL(string: "https://api.example.com/users/" + String(id))!
+    let data = try! Data(contentsOf: url)
+    let json = try! JSONSerialization.jsonObject(with: data) as! [String: Any]
+    return json
+}
+
+func processUsers(ids: [Int]) {
+    var results: [String: Any] = [:]
+    for id in ids {
+        let user = fetchUser(id: id)
+        results[String(id)] = user
+    }
+    print(results)
+}
+
+let userIds = [1, 2, 3, 4, 5]
+processUsers(ids: userIds)`,
+    },
+  ],
+  kotlin: [
+    {
+      label: "Null safety bypass",
+      code: `import java.net.URL
+
+class UserService {
+    fun fetchUser(id: Int): Map<String, Any>? {
+        val connection = URL("https://api.example.com/users/$id").openConnection()
+        val data = connection.getInputStream().bufferedReader().readText()
+        return parseJson(data)
+    }
+
+    fun parseJson(data: String): Map<String, Any>? {
+        return null
+    }
+}
+
+fun main() {
+    val service = UserService()
+    val user = service.fetchUser(1)
+    println(user!!.get("name"))
+
+    val ids = listOf(1, 2, 3)
+    for (id in ids) {
+        val u = service.fetchUser(id)
+        println(u!!.get("name"))
+    }
+}`,
+    },
+  ],
+  css: [
+    {
+      label: "Specificity & layout bugs",
+      code: `#header .nav ul li a.active {
+  color: red !important;
+}
+
+.container {
+  width: 1200px;
+  position: absolute;
+  z-index: 999999;
+}
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  margin-top: -300px;
+  margin-left: -400px;
+  width: 800px;
+  height: 600px;
+}
+
+.btn {
+  background: red;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
+
+@media screen and (max-width: 480px) {
+  .container {
+    width: 1200px;
   }
-  return total;
-}
-
-const userData = fetchUser(123);
-console.log(userData.name);`,
+}`,
     },
   ],
   sql: [
@@ -176,23 +433,12 @@ export default function Home() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  useEffect(() => {
-    function handleKey(e: KeyboardEvent) {
-      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
-        e.preventDefault();
-        if (status !== "loading") handleReview();
-      }
-    }
-    document.addEventListener("keydown", handleKey);
-    return () => document.removeEventListener("keydown", handleKey);
-  }, [status, code, language]);
-
   function handleCodeChange(val: string) {
     setCode(val);
     setLineCount(val.split("\n").length);
   }
 
-  async function handleReview() {
+  const handleReview = useCallback(async () => {
     if (!code.trim()) return;
     setStatus("loading");
     setResult(null);
@@ -215,7 +461,18 @@ export default function Home() {
       setError(err instanceof Error ? err.message : "Review failed");
       setStatus("error");
     }
-  }
+  }, [code, language]);
+
+  useEffect(() => {
+    function handleKey(e: KeyboardEvent) {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        if (status !== "loading") handleReview();
+      }
+    }
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [status, handleReview]);
 
   function handleReset() {
     setCode(EXAMPLES.javascript[0].code);
@@ -280,8 +537,7 @@ export default function Home() {
 
       {/* ── Main layout ── */}
       <div
-        className="flex-1 flex flex-col lg:flex-row max-w-[1600px] mx-auto w-full px-4 py-4 gap-4 overflow-hidden"
-        style={{ height: "calc(100vh - 46px - 30px)" }}
+        className="flex-1 flex flex-col lg:flex-row max-w-[1600px] mx-auto w-full px-4 py-4 gap-4 lg:overflow-hidden lg:h-[calc(100vh-76px)]"
       >
 
         {/* LEFT: Editor panel */}
@@ -314,7 +570,11 @@ export default function Home() {
                       onClick={() => { setLanguage(lang.id); setShowLangMenu(false); }}
                       className={`dropdown-item ${language === lang.id ? "active" : ""}`}
                     >
-                      {language === lang.id ? "▸ " : "  "}{lang.label}
+                      <ChevronRight
+                        className="w-3 h-3 flex-shrink-0"
+                        style={{ visibility: language === lang.id ? "visible" : "hidden" }}
+                      />
+                      {lang.label}
                     </button>
                   ))}
                 </div>
@@ -385,7 +645,7 @@ export default function Home() {
         </div>
 
         {/* RIGHT: Report panel */}
-        <div className="w-full lg:w-[430px] xl:w-[460px] flex-shrink-0 flex flex-col overflow-hidden">
+        <div className="w-full lg:w-[430px] xl:w-[460px] flex-shrink-0 flex flex-col min-h-[400px] lg:min-h-0 lg:overflow-hidden">
 
           {status === "idle" && <EmptyState />}
 

@@ -1,4 +1,4 @@
-# CodeReview AI — How to Run
+# CodeReview AI: How to Run
 
 ## What it does
 Paste any code into the VS Code-style editor and get an instant AI-powered review:
@@ -60,7 +60,7 @@ Open **http://localhost:3000**
 3. Click **Review Code** or press **Ctrl+Enter**
 4. Review the results:
    - Animated score ring (0–100)
-   - Issues list — click any issue to expand details & fix suggestion
+   - Issues list: click any issue to expand details & fix suggestion
    - "What's good" section
    - Click **"View AI-refactored code"** to see the improved version
    - Click **"Copy review as Markdown"** to export the review

@@ -18,7 +18,6 @@ export default function ScoreRing({ score }: Props) {
   const v = getVerdict(score);
 
   useEffect(() => {
-    setAnimated(0);
     let cur = 0;
     const step = Math.max(score / 40, 1);
     const t = setInterval(() => {

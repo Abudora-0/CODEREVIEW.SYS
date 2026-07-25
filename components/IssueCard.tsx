@@ -26,7 +26,7 @@ const SEV_CFG: Record<Issue["severity"], { color: string; code: string; label: s
   info:     { color: "var(--sev-info)",     code: "I", label: "INFO" },
 };
 
-/* diagnostics styled like compiler output: E01 · SEC · L42 — title */
+/* diagnostics styled like compiler output: E01 · SEC · L42 · title */
 export default function IssueCard({ issue, index }: { issue: Issue; index: number }) {
   const [expanded, setExpanded] = useState(false);
   const s = SEV_CFG[issue.severity] ?? SEV_CFG.info;

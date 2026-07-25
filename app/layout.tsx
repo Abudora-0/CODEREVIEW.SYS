@@ -9,7 +9,7 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CODEREVIEW.SYS — AI Code Audit Terminal",
+  title: "CODEREVIEW.SYS · AI Code Audit Terminal",
   description: "Paste your code and get an instant AI-powered audit: quality score, bug detection, security flags, and a refactored version. Powered by Groq + Llama.",
   icons: { icon: "/favicon.svg" },
 };

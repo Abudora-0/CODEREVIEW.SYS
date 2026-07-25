@@ -67,8 +67,9 @@ ${code}
     const review = JSON.parse(cleaned);
 
     return NextResponse.json(review);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Review error:", err);
-    return NextResponse.json({ error: err.message || "Review failed" }, { status: 500 });
+    const message = err instanceof Error ? err.message : "Review failed";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -2,7 +2,7 @@
 
 **Live Demo:** [ai-code-reviewer-lyart-xi.vercel.app](https://ai-code-reviewer-lyart-xi.vercel.app)
 
-An AI-powered code review tool that analyzes your code and delivers instant, structured feedback — bugs, security vulnerabilities, performance issues, and a fully refactored version — all in seconds.
+An AI-powered code review tool that analyzes your code and delivers instant, structured feedback: bugs, security vulnerabilities, performance issues, and a fully refactored version, all in seconds.
 
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
@@ -15,15 +15,15 @@ A "phosphor audit terminal": warm graphite with an amber CRT accent, all-mono ty
 
 ## Features
 
-- **Quality Score** — animated 0–100 instrument gauge with a stamped PASS / REVIEW / CAUTION / REJECT verdict
-- **Bug Detection** — pinpoints issues with exact line numbers
-- **Security Analysis** — flags SQL injection, XSS, and other OWASP vulnerabilities
-- **Performance Suggestions** — highlights inefficient patterns and proposes fixes
-- **AI Refactor** — delivers a fully rewritten, improved version of your code
-- **13 Languages** — JavaScript, TypeScript, Python, Java, C++, Go, Rust, PHP, Ruby, Swift, Kotlin, CSS, SQL
-- **Monaco Editor** — VS Code-style editor with syntax highlighting
-- **Copy as Markdown** — export the full review report in one click
-- **Keyboard Shortcut** — `Ctrl+Enter` to trigger a review instantly
+- **Quality Score**: animated 0–100 instrument gauge with a stamped PASS / REVIEW / CAUTION / REJECT verdict
+- **Bug Detection**: pinpoints issues with exact line numbers
+- **Security Analysis**: flags SQL injection, XSS, and other OWASP vulnerabilities
+- **Performance Suggestions**: highlights inefficient patterns and proposes fixes
+- **AI Refactor**: delivers a fully rewritten, improved version of your code
+- **13 Languages**: JavaScript, TypeScript, Python, Java, C++, Go, Rust, PHP, Ruby, Swift, Kotlin, CSS, SQL
+- **Monaco Editor**: VS Code-style editor with syntax highlighting
+- **Copy as Markdown**: export the full review report in one click
+- **Keyboard Shortcut**: `Ctrl+Enter` to trigger a review instantly
 
 ## Tech Stack
 
@@ -33,7 +33,7 @@ A "phosphor audit terminal": warm graphite with an amber CRT accent, all-mono ty
 | Language | TypeScript |
 | Styling | Tailwind CSS 4 |
 | Editor | Monaco Editor (`@monaco-editor/react`) |
-| AI / LLM | Groq API — Llama 3.3 70B Versatile |
+| AI / LLM | Groq API, Llama 3.3 70B Versatile |
 | Icons | Lucide React |
 
 ## Getting Started
