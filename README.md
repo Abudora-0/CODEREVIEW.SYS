@@ -1,6 +1,6 @@
 # AI Code Reviewer
 
-**Live Demo:** [ai-code-reviewer-lyart-xi.vercel.app](https://ai-code-reviewer-lyart-xi.vercel.app)
+**Live Demo:** [https://codereview-sys.vercel.app/](https://codereview-sys.vercel.app/)
 
 An AI-powered code review tool that analyzes your code and delivers instant, structured feedback: bugs, security vulnerabilities, performance issues, and a fully refactored version, all in seconds.
 
