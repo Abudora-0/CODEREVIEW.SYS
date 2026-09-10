@@ -79,21 +79,28 @@ ${code}
       });
       text = result.text;
     } catch (err) {
-      if (APICallError.isInstance(err)) {
-        console.error(`AI Gateway error ${err.statusCode}:`, err.message);
-        let friendly = `The AI provider returned an error (HTTP ${err.statusCode ?? "unknown"}).`;
-        if (err.statusCode === 401 || err.statusCode === 403) {
-          friendly = "The AI Gateway rejected the API key. Check AI_GATEWAY_API_KEY in your deployment.";
-        } else if (err.statusCode === 402) {
-          friendly = "The AI Gateway credit balance is exhausted. Add credits or wait for the monthly free tier to refresh.";
-        } else if (err.statusCode === 429) {
-          friendly = "Rate limit reached. Wait a moment and run the audit again.";
-        } else if (err.statusCode === 404) {
-          friendly = `None of the configured models are available (tried ${[PRIMARY_MODEL, ...FALLBACK_MODELS].join(", ")}). Pick current slugs from https://ai-gateway.vercel.sh/v1/models and set AI_MODEL / AI_MODEL_FALLBACKS.`;
-        }
-        return NextResponse.json({ error: friendly }, { status: 502 });
+      // Both APICallError and the gateway's own GatewayError carry a numeric statusCode.
+      const status =
+        APICallError.isInstance(err) && typeof err.statusCode === "number"
+          ? err.statusCode
+          : err && typeof err === "object" && "statusCode" in err
+            ? Number((err as { statusCode: unknown }).statusCode)
+            : undefined;
+      const raw = err instanceof Error ? err.message : "";
+      console.error(`AI Gateway error ${status ?? "?"}:`, raw);
+
+      let friendly = `The AI provider returned an error${status ? ` (HTTP ${status})` : ""}.`;
+      if (status === 401 || status === 403) {
+        friendly = "The AI Gateway rejected the API key. Check AI_GATEWAY_API_KEY in your deployment.";
+      } else if (status === 402 || /credit card|add a card|billing|payment method/i.test(raw)) {
+        friendly =
+          "The AI Gateway needs billing set up. Add a payment method to your Vercel account to unlock the monthly free credits: https://vercel.com/account/billing";
+      } else if (status === 429) {
+        friendly = "Rate limit reached. Wait a moment and run the audit again.";
+      } else if (status === 404 || /model.*(not found|does not exist|unavailable)/i.test(raw)) {
+        friendly = `None of the configured models are available (tried ${[PRIMARY_MODEL, ...FALLBACK_MODELS].join(", ")}). Pick current slugs from https://ai-gateway.vercel.sh/v1/models and set AI_MODEL / AI_MODEL_FALLBACKS.`;
       }
-      throw err;
+      return NextResponse.json({ error: friendly }, { status: 502 });
     }
 
     // Strip any accidental markdown fences before parsing
