@@ -1,31 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
+import { generateText, APICallError } from "ai";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
-// Groq rotates its hosted models on a published schedule. Rather than pin one id,
-// try a list in order and fall through to the next when a model is missing or
-// decommissioned — so a retired model degrades gracefully instead of 500ing.
-// Override the whole list with GROQ_MODEL (comma-separated, highest priority first).
-// Current free-tier ("developer plan") models: https://console.groq.com/docs/models
-const GROQ_MODELS = (
-  process.env.GROQ_MODEL ?? "openai/gpt-oss-120b,openai/gpt-oss-20b,llama-3.1-8b-instant"
+// Requests route through the Vercel AI Gateway (https://vercel.com/docs/ai-gateway).
+// The gateway tries PRIMARY first, then each model in FALLBACKS in order, so a
+// retired model or a provider outage degrades gracefully with no redeploy.
+// Slugs: https://ai-gateway.vercel.sh/v1/models
+const PRIMARY_MODEL = process.env.AI_MODEL ?? "openai/gpt-oss-120b";
+const FALLBACK_MODELS = (
+  process.env.AI_MODEL_FALLBACKS ?? "openai/gpt-oss-20b,google/gemini-2.5-flash-lite"
 )
   .split(",")
   .map((m) => m.trim())
   .filter(Boolean);
-
-const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
-
-/** True when the error means "this model won't work" — safe to try the next one. */
-function isModelUnavailable(status: number, body: string): boolean {
-  if (status === 404) return true;
-  try {
-    const code = JSON.parse(body)?.error?.code ?? "";
-    return typeof code === "string" && code.startsWith("model_");
-  } catch {
-    return false;
-  }
-}
 
 export async function POST(req: NextRequest) {
   try {
@@ -35,9 +24,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No code provided" }, { status: 400 });
     }
 
-    if (!process.env.GROQ_API_KEY) {
+    if (!process.env.AI_GATEWAY_API_KEY && !process.env.VERCEL_OIDC_TOKEN) {
       return NextResponse.json(
-        { error: "GROQ_API_KEY is not set on the server. Add it in your deployment's environment variables." },
+        {
+          error:
+            "AI_GATEWAY_API_KEY is not set on the server. Create a key at https://vercel.com/dashboard → AI Gateway and add it to your environment variables.",
+        },
         { status: 500 },
       );
     }
@@ -71,53 +63,38 @@ Code to review (${language}):
 ${code}
 \`\`\``;
 
-    let groqRes: Response | null = null;
-    let lastStatus = 0;
-    let lastBody = "";
-
-    for (const model of GROQ_MODELS) {
-      const res = await fetch(GROQ_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
+    let text: string;
+    try {
+      const result = await generateText({
+        model: PRIMARY_MODEL,
+        prompt,
+        temperature: 0.3,
+        maxOutputTokens: 4096,
+        providerOptions: {
+          gateway: {
+            models: FALLBACK_MODELS,
+            tags: ["feature:code-review"],
+          },
         },
-        body: JSON.stringify({
-          model,
-          messages: [{ role: "user", content: prompt }],
-          temperature: 0.3,
-          max_tokens: 4096,
-          response_format: { type: "json_object" },
-        }),
       });
-
-      if (res.ok) {
-        groqRes = res;
-        break;
+      text = result.text;
+    } catch (err) {
+      if (APICallError.isInstance(err)) {
+        console.error(`AI Gateway error ${err.statusCode}:`, err.message);
+        let friendly = `The AI provider returned an error (HTTP ${err.statusCode ?? "unknown"}).`;
+        if (err.statusCode === 401 || err.statusCode === 403) {
+          friendly = "The AI Gateway rejected the API key. Check AI_GATEWAY_API_KEY in your deployment.";
+        } else if (err.statusCode === 402) {
+          friendly = "The AI Gateway credit balance is exhausted. Add credits or wait for the monthly free tier to refresh.";
+        } else if (err.statusCode === 429) {
+          friendly = "Rate limit reached. Wait a moment and run the audit again.";
+        } else if (err.statusCode === 404) {
+          friendly = `None of the configured models are available (tried ${[PRIMARY_MODEL, ...FALLBACK_MODELS].join(", ")}). Pick current slugs from https://ai-gateway.vercel.sh/v1/models and set AI_MODEL / AI_MODEL_FALLBACKS.`;
+        }
+        return NextResponse.json({ error: friendly }, { status: 502 });
       }
-
-      lastStatus = res.status;
-      lastBody = await res.text();
-      console.error(`Groq model "${model}" failed (${res.status}):`, lastBody);
-
-      // Auth / rate-limit / server errors won't be fixed by another model.
-      if (!isModelUnavailable(res.status, lastBody)) break;
+      throw err;
     }
-
-    if (!groqRes) {
-      let friendly = `The AI provider returned an error (HTTP ${lastStatus}).`;
-      if (lastStatus === 401) {
-        friendly = "Groq rejected the API key. Check the GROQ_API_KEY value in your deployment.";
-      } else if (lastStatus === 429) {
-        friendly = "Groq rate limit reached. Wait a moment and run the audit again.";
-      } else if (isModelUnavailable(lastStatus, lastBody)) {
-        friendly = `None of the configured Groq models are available to this API key (tried: ${GROQ_MODELS.join(", ")}). Set GROQ_MODEL to a current developer-plan model from https://console.groq.com/docs/models, or check that the key's account has model access.`;
-      }
-      return NextResponse.json({ error: friendly }, { status: 502 });
-    }
-
-    const groqData = await groqRes.json();
-    const text = groqData.choices?.[0]?.message?.content ?? "";
 
     // Strip any accidental markdown fences before parsing
     const cleaned = text.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
