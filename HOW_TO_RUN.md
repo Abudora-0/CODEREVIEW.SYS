@@ -72,7 +72,7 @@ Open **http://localhost:3000**
 | Feature | Description |
 |---------|-------------|
 | 🎨 Monaco Editor | VS Code-style editor with syntax highlighting |
-| 🤖 AI Review | Powered by Groq + Llama 3.3 70B |
+| 🤖 AI Review | Powered by Groq (openai/gpt-oss-120b, with fallback) |
 | 📊 Quality Score | Animated 0–100 score ring |
 | 🐛 Bug Detection | Identifies bugs with line numbers |
 | 🔒 Security Audit | Flags SQL injection, XSS, etc. |
@@ -98,7 +98,7 @@ JavaScript, TypeScript, Python, Java, C++, Go, Rust, PHP, Ruby, Swift, Kotlin, C
 | Language | TypeScript |
 | Styling | Tailwind CSS |
 | Code Editor | Monaco Editor (`@monaco-editor/react`) |
-| AI Model | Llama 3.3 70B via Groq API |
+| AI Model | Groq API — `openai/gpt-oss-120b` with automatic fallback (`GROQ_MODEL` to override) |
 | Icons | Lucide React |
 
 ---

@@ -7,7 +7,7 @@ An AI-powered code review tool that analyzes your code and delivers instant, str
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?logo=tailwind-css&logoColor=white)
-![Groq](https://img.shields.io/badge/Groq-Llama_3.3_70B-F55036)
+![Groq](https://img.shields.io/badge/Groq-GPT_OSS_120B-F55036)
 
 ## Design
 
@@ -33,7 +33,7 @@ A "phosphor audit terminal": warm graphite with an amber CRT accent, all-mono ty
 | Language | TypeScript |
 | Styling | Tailwind CSS 4 |
 | Editor | Monaco Editor (`@monaco-editor/react`) |
-| AI / LLM | Groq API, Llama 3.3 70B Versatile |
+| AI / LLM | Groq API — `openai/gpt-oss-120b` with automatic fallback (configurable via `GROQ_MODEL`) |
 | Icons | Lucide React |
 
 ## Getting Started
@@ -57,7 +57,16 @@ Create a `.env.local` file in the project root:
 
 ```env
 GROQ_API_KEY=your_groq_api_key_here
+# Optional. Comma-separated list of Groq models to try in order — the route falls
+# through to the next when one is retired. Defaults to:
+#   openai/gpt-oss-120b,openai/gpt-oss-20b,llama-3.1-8b-instant
+# Current list: https://console.groq.com/docs/models
+GROQ_MODEL=openai/gpt-oss-120b,openai/gpt-oss-20b
 ```
+
+> Deploying? Set the same `GROQ_API_KEY` (and optionally `GROQ_MODEL`) in your
+> host's environment variables. The free Groq tier works in production — this app
+> is not local-only.
 
 ### Run
 

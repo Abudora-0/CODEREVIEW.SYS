@@ -518,7 +518,7 @@ export default function Home() {
             className="hidden sm:block text-[10px] px-2 py-0.5 tracking-[0.15em]"
             style={{ border: "1px solid var(--border-muted)", color: "var(--ink-muted)" }}
           >
-            ENGINE: GROQ / LLAMA-3.3-70B
+            ENGINE: GROQ LPU
           </span>
 
           <div className="ml-auto flex items-center gap-4 text-[10px] tracking-[0.12em]">
@@ -754,7 +754,7 @@ function LoadingState() {
     "$ codereview --run --deep",
     "reading source buffer… ok",
     "tokenizing input… ok",
-    "loading llama-3.3-70b via groq… ok",
+    "connecting to groq inference… ok",
     "running heuristics: bugs sec perf style",
     "compiling audit report…",
   ];
