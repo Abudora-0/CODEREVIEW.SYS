@@ -11,7 +11,7 @@ Paste any code into the VS Code-style editor and get an instant AI-powered revie
 
 ## Prerequisites
 - Node.js v18+
-- A Vercel AI Gateway API key (see step 2)
+- A free Groq API key (see step 2)
 
 ---
 
@@ -24,12 +24,12 @@ npm install
 
 ---
 
-## 2. Get a Vercel AI Gateway API Key
+## 2. Get a Free Groq API Key
 
-1. Go to **https://vercel.com/dashboard** and open the **AI Gateway** tab
-2. Open **API Keys** → **Create Key** and copy it
-3. Every Vercel team gets **$5 of free AI Gateway credits per month** — a review
-   costs about $0.001, so the free tier is plenty
+1. Go to **https://console.groq.com**
+2. Sign up / log in
+3. Click **"API Keys"** in the sidebar
+4. Click **"Create API Key"** and copy it (starts with `gsk_...`)
 
 ---
 
@@ -38,11 +38,7 @@ npm install
 Create `.env` at the project root:
 
 ```env
-AI_GATEWAY_API_KEY="your-key-here"
-
-# Optional — override the model chain (primary, then fallbacks tried in order):
-# AI_MODEL="openai/gpt-oss-120b"
-# AI_MODEL_FALLBACKS="openai/gpt-oss-20b,google/gemini-2.5-flash-lite"
+GROQ_API_KEY="gsk_your-key-here"
 ```
 
 ---
@@ -76,7 +72,7 @@ Open **http://localhost:3000**
 | Feature | Description |
 |---------|-------------|
 | 🎨 Monaco Editor | VS Code-style editor with syntax highlighting |
-| 🤖 AI Review | Vercel AI Gateway — `openai/gpt-oss-120b` with cross-provider fallback |
+| 🤖 AI Review | Powered by Groq (openai/gpt-oss-120b, with fallback) |
 | 📊 Quality Score | Animated 0–100 score ring |
 | 🐛 Bug Detection | Identifies bugs with line numbers |
 | 🔒 Security Audit | Flags SQL injection, XSS, etc. |
@@ -84,7 +80,7 @@ Open **http://localhost:3000**
 | ✨ Refactored Code | Full AI-rewritten version |
 | 📋 Markdown Export | Copy full review as Markdown |
 | ⌨️ Keyboard Shortcut | Ctrl+Enter to trigger review |
-| ⏱️ Review Time | Shows how fast the model responded |
+| ⏱️ Review Time | Shows how fast Groq responded |
 
 ---
 
@@ -98,11 +94,11 @@ JavaScript, TypeScript, Python, Java, C++, Go, Rust, PHP, Ruby, Swift, Kotlin, C
 
 | Layer | Technology |
 |-------|------------|
-| Framework | Next.js 16 (App Router) |
+| Framework | Next.js 14 (App Router) |
 | Language | TypeScript |
 | Styling | Tailwind CSS |
 | Code Editor | Monaco Editor (`@monaco-editor/react`) |
-| AI | Vercel AI Gateway + AI SDK v6 — `openai/gpt-oss-120b`, fallbacks via `AI_MODEL_FALLBACKS` |
+| AI Model | Groq API — `openai/gpt-oss-120b` with automatic fallback (`GROQ_MODEL` to override) |
 | Icons | Lucide React |
 
 ---
@@ -113,7 +109,7 @@ JavaScript, TypeScript, Python, Java, C++, Go, Rust, PHP, Ruby, Swift, Kotlin, C
 ai-code-reviewer/
 ├── app/
 │   ├── api/
-│   │   └── review/route.ts     # AI Gateway call + model fallback chain
+│   │   └── review/route.ts     # Groq API call + JSON parsing
 │   ├── globals.css             # Dark theme + animations
 │   ├── layout.tsx              # Root layout
 │   └── page.tsx                # Main page (editor + results)

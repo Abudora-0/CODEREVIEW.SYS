@@ -7,7 +7,7 @@ An AI-powered code review tool that analyzes your code and delivers instant, str
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?logo=tailwind-css&logoColor=white)
-![Vercel AI Gateway](https://img.shields.io/badge/Vercel_AI_Gateway-gpt--oss--120b-black?logo=vercel)
+![Groq](https://img.shields.io/badge/Groq-GPT_OSS_120B-F55036)
 
 ## Design
 
@@ -33,7 +33,7 @@ A "phosphor audit terminal": warm graphite with an amber CRT accent, all-mono ty
 | Language | TypeScript |
 | Styling | Tailwind CSS 4 |
 | Editor | Monaco Editor (`@monaco-editor/react`) |
-| AI / LLM | [Vercel AI Gateway](https://vercel.com/docs/ai-gateway) (AI SDK v6) — `openai/gpt-oss-120b` with a cross-provider fallback chain |
+| AI / LLM | Groq API — `openai/gpt-oss-120b` with automatic fallback (configurable via `GROQ_MODEL`) |
 | Icons | Lucide React |
 
 ## Getting Started
@@ -41,9 +41,7 @@ A "phosphor audit terminal": warm graphite with an amber CRT accent, all-mono ty
 ### Prerequisites
 
 - Node.js 18+
-- A **Vercel AI Gateway** API key — create one in the [Vercel dashboard](https://vercel.com/dashboard)
-  under **AI Gateway → API Keys**. Every team gets $5 of free credits per month, which
-  is far more than this app needs (a review costs ~$0.001).
+- A [Groq API key](https://console.groq.com/) (free tier available)
 
 ### Installation
 
@@ -58,19 +56,17 @@ npm install
 Create a `.env.local` file in the project root:
 
 ```env
-AI_GATEWAY_API_KEY=your_ai_gateway_key_here
-
-# Optional — override the model chain. Primary first, then comma-separated fallbacks.
-# The gateway tries each in order, so a retired model or a provider outage is handled
-# automatically with no redeploy. Slugs: https://ai-gateway.vercel.sh/v1/models
-# AI_MODEL=openai/gpt-oss-120b
-# AI_MODEL_FALLBACKS=openai/gpt-oss-20b,google/gemini-2.5-flash-lite
+GROQ_API_KEY=your_groq_api_key_here
+# Optional. Comma-separated list of Groq models to try in order — the route falls
+# through to the next when one is retired. Defaults to:
+#   openai/gpt-oss-120b,openai/gpt-oss-20b,llama-3.1-8b-instant
+# Current list: https://console.groq.com/docs/models
+GROQ_MODEL=openai/gpt-oss-120b,openai/gpt-oss-20b
 ```
 
-> Deploying to Vercel? Add `AI_GATEWAY_API_KEY` in **Project → Settings → Environment
-> Variables** and redeploy. (On Vercel you can also skip the key entirely and use
-> [OIDC](https://vercel.com/docs/ai-gateway/authentication-and-byok/oidc) — the route
-> falls back to `VERCEL_OIDC_TOKEN` when no key is set.)
+> Deploying? Set the same `GROQ_API_KEY` (and optionally `GROQ_MODEL`) in your
+> host's environment variables. The free Groq tier works in production — this app
+> is not local-only.
 
 ### Run
 
@@ -92,7 +88,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ```
 ├── app/
-│   ├── api/review/route.ts   # AI Gateway call + model fallback chain
+│   ├── api/review/route.ts   # Groq API integration
 │   └── page.tsx              # Main layout
 ├── components/
 │   ├── CodeEditor.tsx        # Monaco editor wrapper
