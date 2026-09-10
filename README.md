@@ -41,27 +41,30 @@ A "phosphor audit terminal": warm graphite with an amber CRT accent, all-mono ty
 ### Prerequisites
 
 - Node.js 18+
-- A [Groq API key](https://console.groq.com/) (free tier available)
+- A [Groq API key](https://console.groq.com/) — free. The models this app uses
+  (`openai/gpt-oss-*`) are on Groq's free developer plan.
 
 ### Installation
 
 ```bash
-git clone https://github.com/yourusername/ai-code-reviewer.git
-cd ai-code-reviewer
+git clone https://github.com/Abudora-0/CODEREVIEW.SYS.git
+cd CODEREVIEW.SYS
 npm install
 ```
 
 ### Environment Variables
 
-Create a `.env.local` file in the project root:
+Create a `.env` file in the project root:
 
 ```env
 GROQ_API_KEY=your_groq_api_key_here
-# Optional. Comma-separated list of Groq models to try in order — the route falls
-# through to the next when one is retired. Defaults to:
+
+# Optional. Comma-separated list of models the route tries in order — it falls
+# through to the next when one is unavailable or retired, so a decommissioned
+# model never takes the app down. Default:
 #   openai/gpt-oss-120b,openai/gpt-oss-20b,llama-3.1-8b-instant
 # Current list: https://console.groq.com/docs/models
-GROQ_MODEL=openai/gpt-oss-120b,openai/gpt-oss-20b
+# GROQ_MODEL=openai/gpt-oss-120b,openai/gpt-oss-20b
 ```
 
 > Deploying? Set the same `GROQ_API_KEY` (and optionally `GROQ_MODEL`) in your
@@ -80,15 +83,20 @@ Open [http://localhost:3000](http://localhost:3000).
 
 1. Paste any code snippet into the Monaco editor
 2. Select the language from the dropdown (or use a built-in example)
-3. Click **Review Code** or press `Ctrl+Enter`
-4. The review panel renders your quality score, detected issues, and a refactored version side-by-side
-5. Copy the full report as Markdown with one click
+3. Click **RUN AUDIT** or press `Ctrl+Enter`
+4. The route sends the code to Groq (OpenAI-compatible API). It walks the model
+   list until one responds, forcing a JSON object back, and returns the parsed
+   review — score, issues, positives, and a full refactored version
+5. The panel renders it side-by-side; export the whole report as Markdown in one click
+
+Provider errors (bad key, rate limit, every model retired, malformed output) come
+back as a plain-language message in the fault panel, not a raw stack trace.
 
 ## Project Structure
 
 ```
 ├── app/
-│   ├── api/review/route.ts   # Groq API integration
+│   ├── api/review/route.ts   # Groq call, model fallback chain, JSON parsing
 │   └── page.tsx              # Main layout
 ├── components/
 │   ├── CodeEditor.tsx        # Monaco editor wrapper

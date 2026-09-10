@@ -18,7 +18,7 @@ Paste any code into the VS Code-style editor and get an instant AI-powered revie
 ## 1. Install Dependencies
 
 ```powershell
-cd D:\Projects\ai-code-reviewer
+cd path\to\CODEREVIEW.SYS
 npm install
 ```
 
@@ -39,6 +39,10 @@ Create `.env` at the project root:
 
 ```env
 GROQ_API_KEY="gsk_your-key-here"
+
+# Optional — comma-separated model list, tried in order (retired models are
+# skipped automatically). Default: openai/gpt-oss-120b,openai/gpt-oss-20b,llama-3.1-8b-instant
+# GROQ_MODEL="openai/gpt-oss-120b,openai/gpt-oss-20b"
 ```
 
 ---
@@ -56,14 +60,14 @@ Open **http://localhost:3000**
 ## How to Use
 
 1. **Select a language** from the dropdown (13 supported)
-2. **Load an example** via the Examples button, or paste your own code
-3. Click **Review Code** or press **Ctrl+Enter**
+2. **Load a sample** via the Samples button, or paste your own code
+3. Click **RUN AUDIT** or press **Ctrl+Enter**
 4. Review the results:
-   - Animated score ring (0–100)
-   - Issues list: click any issue to expand details & fix suggestion
-   - "What's good" section
-   - Click **"View AI-refactored code"** to see the improved version
-   - Click **"Copy review as Markdown"** to export the review
+   - Animated score ring (0–100) with a PASS / REVIEW / CAUTION / REJECT verdict
+   - Diagnostics list: click any issue to expand details & fix suggestion
+   - "Passed checks" section
+   - Click **"Load refactored source"** to see the improved version in the editor
+   - Click **"Export report · Markdown"** to copy the review
 
 ---
 
@@ -72,7 +76,7 @@ Open **http://localhost:3000**
 | Feature | Description |
 |---------|-------------|
 | 🎨 Monaco Editor | VS Code-style editor with syntax highlighting |
-| 🤖 AI Review | Powered by Groq (openai/gpt-oss-120b, with fallback) |
+| 🤖 AI Review | Groq — `openai/gpt-oss-120b`, auto-falls back through a model list |
 | 📊 Quality Score | Animated 0–100 score ring |
 | 🐛 Bug Detection | Identifies bugs with line numbers |
 | 🔒 Security Audit | Flags SQL injection, XSS, etc. |
@@ -80,7 +84,7 @@ Open **http://localhost:3000**
 | ✨ Refactored Code | Full AI-rewritten version |
 | 📋 Markdown Export | Copy full review as Markdown |
 | ⌨️ Keyboard Shortcut | Ctrl+Enter to trigger review |
-| ⏱️ Review Time | Shows how fast Groq responded |
+| ⏱️ Review Time | Shows how fast the model responded |
 
 ---
 
@@ -94,9 +98,9 @@ JavaScript, TypeScript, Python, Java, C++, Go, Rust, PHP, Ruby, Swift, Kotlin, C
 
 | Layer | Technology |
 |-------|------------|
-| Framework | Next.js 14 (App Router) |
+| Framework | Next.js 16 (App Router) |
 | Language | TypeScript |
-| Styling | Tailwind CSS |
+| Styling | Tailwind CSS 4 |
 | Code Editor | Monaco Editor (`@monaco-editor/react`) |
 | AI Model | Groq API — `openai/gpt-oss-120b` with automatic fallback (`GROQ_MODEL` to override) |
 | Icons | Lucide React |
@@ -106,10 +110,10 @@ JavaScript, TypeScript, Python, Java, C++, Go, Rust, PHP, Ruby, Swift, Kotlin, C
 ## Folder Structure
 
 ```
-ai-code-reviewer/
+CODEREVIEW.SYS/
 ├── app/
 │   ├── api/
-│   │   └── review/route.ts     # Groq API call + JSON parsing
+│   │   └── review/route.ts     # Groq call, model fallback chain, JSON parsing
 │   ├── globals.css             # Dark theme + animations
 │   ├── layout.tsx              # Root layout
 │   └── page.tsx                # Main page (editor + results)
