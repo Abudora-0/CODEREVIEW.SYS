@@ -620,8 +620,9 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Monaco editor */}
-          <div className="flex-1 overflow-hidden" style={{ background: "#0b0b09" }}>
+          {/* Monaco editor — needs a definite height on mobile (vh) so Monaco's
+              height:100% resolves; on lg the flex chain has a fixed root already */}
+          <div className="h-[58vh] min-h-[320px] lg:h-auto lg:min-h-0 lg:flex-1 overflow-hidden" style={{ background: "#0b0b09" }}>
             <CodeEditor
               value={displayCode}
               onChange={showRefactored ? undefined : handleCodeChange}
